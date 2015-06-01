@@ -7,7 +7,7 @@ module Searchable
 		vals = params.values
 
 		conditions_str = cols.map{|col| "#{col} = ?"}.join(" AND ")
-		found = DBConnection.execute(<<-SQL, vals)
+		found = DBConnection.execute(<<-SQL, *vals)
 			SELECT
 			  *
 			FROM 
@@ -15,7 +15,7 @@ module Searchable
 			WHERE
 			  #{conditions_str}
 		SQL
-		found.map{|attr| self.new(attr)}
+		self.parse_all(found)
 	end
 end
 

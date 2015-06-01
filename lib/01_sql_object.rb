@@ -17,7 +17,7 @@ class SQLObject
   def self.finalize!
     cols = self.columns
     cols.each do |col|
-      define_method(col + "=") do |arg| 
+      define_method(col.to_s + "=") do |arg| 
         self.attributes[col] = arg
       end
 
@@ -46,8 +46,8 @@ class SQLObject
 
   def self.parse_all(results)
     objects = []
-    results.each do |attr|
-      objects << self.new(attr)
+    results.each do |attrs|
+      objects << self.new(attrs)
     end
     objects
   end
@@ -80,11 +80,11 @@ class SQLObject
   end
 
   def insert
-    col_names = self.class.columns[1..-1].join(",")
-    question_marks = (["?"] * attributes.length).join(",")
+    col_names = attributes.keys.join(", ")
+    question_marks = (["?"] * attributes.length).join(", ")
     DBConnection.execute(<<-SQL, *attribute_values)
       INSERT INTO
-        #{self.class.table_name}(#{col_names})
+        #{self.class.table_name} (#{col_names})
       VALUES
         (#{question_marks})
     SQL

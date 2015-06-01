@@ -41,7 +41,7 @@ module Associatable #continued in 04_associatable2.rb
       foreign = options.foreign_key.to_sym
       model_class = options.model_class
       primary = options.primary_key
-      model_class.where(primary.to_sym => self.send(foreign)).first
+      model_class.where(primary => self.send(foreign)).first
     end
   end
 

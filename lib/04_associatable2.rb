@@ -3,7 +3,7 @@ require_relative '03_associatable'
 # Phase IV
 module Associatable
   def has_one_through(name, through_name, source_name)
-  	define_method(name) {
+  	define_method(name) do
   		through_options = self.class.assoc_options[through_name]
 	  	source_options = through_options.model_class.assoc_options[source_name]
 	  	through_id = self.send(through_options.foreign_key)
@@ -17,8 +17,7 @@ module Associatable
 			WHERE
 			  #{through_options.table_name}.#{through_options.primary_key} = ?
 		 SQL
-		attrs = results.first
-		source_options.model_class.new(attrs)
-  	}
+		source_options.model_class.parse_all(results).first
+  	end
   end
 end
