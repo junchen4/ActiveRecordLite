@@ -3,7 +3,6 @@ require 'active_support/inflector'
 
 class SQLObject
   def self.columns
-    return @cols if @cols
     @cols = DBConnection.execute2(<<-SQL)
       SELECT
         *
@@ -15,13 +14,14 @@ class SQLObject
   end
 
   def self.finalize!
-    cols = self.columns
-    cols.each do |col|
+    col_names = self.columns
+    col_names.each do |col|
+      puts col
       define_method(col.to_s + "=") do |arg| 
         self.attributes[col] = arg
       end
 
-      define_method(col) { self.attributes[col] }
+      define_method(col.to_s) { self.attributes[col] }
     end
   end
 
@@ -40,7 +40,6 @@ class SQLObject
       FROM
         #{self.table_name}
     SQL
-
     self.parse_all(results)
   end
 
@@ -80,8 +79,8 @@ class SQLObject
   end
 
   def insert
-    col_names = attributes.keys.join(", ")
-    question_marks = (["?"] * attributes.length).join(", ")
+    col_names = self.class.columns.join(",")
+    question_marks = (["?"] * self.class.columns.count).join(",")
     DBConnection.execute(<<-SQL, *attribute_values)
       INSERT INTO
         #{self.class.table_name} (#{col_names})
